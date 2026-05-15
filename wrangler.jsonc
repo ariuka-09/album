@@ -40,7 +40,7 @@
 		{
 			"binding": "DB",
 			"database_name": "album-db",
-			"database_id": "local"
+			"database_id": "bebe0463-559c-4006-bb58-605efd82a280"
 		}
 	],
 	"r2_buckets": [
