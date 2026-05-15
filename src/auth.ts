@@ -32,20 +32,36 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return false;
         }
 
-        await db
-          .insert(users)
-          .values({
-            id: userId,
-            name: user.name ?? "Unknown",
-            email,
-            avatar: user.image ?? null,
-            role: "member",
-            createdAt: new Date(),
-          })
-          .onConflictDoUpdate({
-            target: users.id,
-            set: { name: user.name ?? "Unknown", avatar: user.image ?? null },
-          });
+        // Upsert on id; if a stale row exists with the same email but
+        // different id (e.g. old UUID), update that row's id to the
+        // correct Google sub instead.
+        const existing = await db
+          .select({ id: users.id })
+          .from(users)
+          .where(sql`lower(${users.email}) = ${email}`)
+          .get();
+
+        if (existing && existing.id !== userId) {
+          await db
+            .update(users)
+            .set({ id: userId, name: user.name ?? "Unknown", avatar: user.image ?? null })
+            .where(sql`lower(${users.email}) = ${email}`);
+        } else {
+          await db
+            .insert(users)
+            .values({
+              id: userId,
+              name: user.name ?? "Unknown",
+              email,
+              avatar: user.image ?? null,
+              role: "member",
+              createdAt: new Date(),
+            })
+            .onConflictDoUpdate({
+              target: users.id,
+              set: { name: user.name ?? "Unknown", avatar: user.image ?? null },
+            });
+        }
 
         return true;
       } catch (err) {
