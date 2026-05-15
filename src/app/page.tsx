@@ -1,9 +1,5 @@
-import Image from "next/image";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return (
-    <div className=" flex items-center justify-center h-screen bg-violet-400 ">
-      <p>Somethings cooking right here...</p>
-    </div>
-  );
+  redirect("/album");
 }

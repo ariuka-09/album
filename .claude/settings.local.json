@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(node -e \"const pkg = require\\('./package.json'\\); console.log\\(JSON.stringify\\({...pkg.dependencies,...pkg.devDependencies}, null, 2\\)\\)\")",
+      "Bash(mkdir -p /Users/ariuntuguldur/Documents/personal/album/.claude/worktrees/wizardly-satoshi-f4ab85/src/db /Users/ariuntuguldur/Documents/personal/album/.claude/worktrees/wizardly-satoshi-f4ab85/src/graphql /Users/ariuntuguldur/Documents/personal/album/.claude/worktrees/wizardly-satoshi-f4ab85/src/components /Users/ariuntuguldur/Documents/personal/album/.claude/worktrees/wizardly-satoshi-f4ab85/migrations /Users/ariuntuguldur/Documents/personal/album/.claude/worktrees/wizardly-satoshi-f4ab85/src/app/api/auth/\\\\[...nextauth\\\\] /Users/ariuntuguldur/Documents/personal/album/.claude/worktrees/wizardly-satoshi-f4ab85/src/app/api/graphql /Users/ariuntuguldur/Documents/personal/album/.claude/worktrees/wizardly-satoshi-f4ab85/src/app/api/upload /Users/ariuntuguldur/Documents/personal/album/.claude/worktrees/wizardly-satoshi-f4ab85/src/app/api/photos/\\\\[key\\\\] /Users/ariuntuguldur/Documents/personal/album/.claude/worktrees/wizardly-satoshi-f4ab85/src/app/login /Users/ariuntuguldur/Documents/personal/album/.claude/worktrees/wizardly-satoshi-f4ab85/src/app/album/\\\\[id\\\\] /Users/ariuntuguldur/Documents/personal/album/.claude/worktrees/wizardly-satoshi-f4ab85/src/app/feed /Users/ariuntuguldur/Documents/personal/album/.claude/worktrees/wizardly-satoshi-f4ab85/src/app/post/\\\\[id\\\\])",
+      "Bash(npx tsc *)"
+    ]
+  }
+}
