@@ -55,6 +55,10 @@ export const postPhotos = sqliteTable("post_photos", {
   orderIndex: integer("order_index").notNull().default(0),
 });
 
+export const invites = sqliteTable("invites", {
+  email: text("email").primaryKey(),
+});
+
 export type User = typeof users.$inferSelect;
 export type Album = typeof albums.$inferSelect;
 export type Post = typeof posts.$inferSelect;
