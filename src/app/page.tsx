@@ -4,6 +4,7 @@ export default function Home() {
   return (
     <div className=" flex items-center justify-center h-screen bg-violet-400 ">
       <p>Somethings cooking right here...</p>
+      <p>Bilguun pp so small</p>
     </div>
   );
 }
