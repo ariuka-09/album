@@ -1,6 +1,16 @@
 import { eq, desc } from "drizzle-orm";
+import { GraphQLError } from "graphql";
 import { builder } from "./builder";
 import { albums, posts, postPhotos, users } from "@/db/schema";
+
+// D1 may return createdAt as a raw UNIX-seconds integer instead of a Date
+// depending on the drizzle version. Normalise defensively.
+function toIso(val: Date | number | unknown): string {
+  if (val instanceof Date) return val.toISOString();
+  const n = Number(val);
+  // UNIX seconds are < 1e11; UNIX ms are >= 1e11
+  return new Date(n < 1e11 ? n * 1000 : n).toISOString();
+}
 
 // ── Declare refs first so circular references work ─────────────────────────
 
@@ -38,7 +48,7 @@ PostType.implement({
   fields: (t) => ({
     id: t.exposeString("id"),
     description: t.exposeString("description", { nullable: true }),
-    createdAt: t.string({ resolve: (p) => p.createdAt.toISOString() }),
+    createdAt: t.string({ resolve: (p) => toIso(p.createdAt) }),
     photos: t.field({
       type: [PostPhotoType],
       resolve: async (post, _args, ctx) =>
@@ -67,7 +77,7 @@ AlbumType.implement({
     title: t.exposeString("title"),
     description: t.exposeString("description", { nullable: true }),
     coverUrl: t.exposeString("coverUrl", { nullable: true }),
-    createdAt: t.string({ resolve: (a) => a.createdAt.toISOString() }),
+    createdAt: t.string({ resolve: (a) => toIso(a.createdAt) }),
     createdBy: t.field({
       type: UserType,
       resolve: async (album, _args, ctx) => {
@@ -141,7 +151,7 @@ builder.mutationType({
         description: t.arg.string(),
       },
       resolve: async (_root, args, ctx) => {
-        if (!ctx.user) throw new Error("Unauthenticated");
+        if (!ctx.user) throw new GraphQLError("Unauthenticated", { extensions: { code: "UNAUTHENTICATED" } });
         const [album] = await ctx.db
           .insert(albums)
           .values({ title: args.title, description: args.description ?? null, createdBy: ctx.user.id })
@@ -154,8 +164,8 @@ builder.mutationType({
       type: "Boolean",
       args: { id: t.arg.string({ required: true }) },
       resolve: async (_root, args, ctx) => {
-        if (!ctx.user) throw new Error("Unauthenticated");
-        if (ctx.user.role !== "admin") throw new Error("Forbidden");
+        if (!ctx.user) throw new GraphQLError("Unauthenticated", { extensions: { code: "UNAUTHENTICATED" } });
+        if (ctx.user.role !== "admin") throw new GraphQLError("Forbidden", { extensions: { code: "FORBIDDEN" } });
         await ctx.db.delete(albums).where(eq(albums.id, args.id));
         return true;
       },
@@ -168,7 +178,7 @@ builder.mutationType({
         coverUrl: t.arg.string({ required: true }),
       },
       resolve: async (_root, args, ctx) => {
-        if (!ctx.user) throw new Error("Unauthenticated");
+        if (!ctx.user) throw new GraphQLError("Unauthenticated", { extensions: { code: "UNAUTHENTICATED" } });
         const [album] = await ctx.db
           .update(albums)
           .set({ coverUrl: args.coverUrl })
@@ -186,7 +196,7 @@ builder.mutationType({
         photoUrls: t.arg.stringList({ required: true }),
       },
       resolve: async (_root, args, ctx) => {
-        if (!ctx.user) throw new Error("Unauthenticated");
+        if (!ctx.user) throw new GraphQLError("Unauthenticated", { extensions: { code: "UNAUTHENTICATED" } });
         const [post] = await ctx.db
           .insert(posts)
           .values({ albumId: args.albumId, description: args.description ?? null, createdBy: ctx.user.id })
@@ -206,10 +216,10 @@ builder.mutationType({
       type: "Boolean",
       args: { id: t.arg.string({ required: true }) },
       resolve: async (_root, args, ctx) => {
-        if (!ctx.user) throw new Error("Unauthenticated");
+        if (!ctx.user) throw new GraphQLError("Unauthenticated", { extensions: { code: "UNAUTHENTICATED" } });
         const [post] = await ctx.db.select().from(posts).where(eq(posts.id, args.id));
-        if (!post) throw new Error("Not found");
-        if (post.createdBy !== ctx.user.id && ctx.user.role !== "admin") throw new Error("Forbidden");
+        if (!post) throw new GraphQLError("Not found", { extensions: { code: "NOT_FOUND" } });
+        if (post.createdBy !== ctx.user.id && ctx.user.role !== "admin") throw new GraphQLError("Forbidden", { extensions: { code: "FORBIDDEN" } });
         await ctx.db.delete(posts).where(eq(posts.id, args.id));
         return true;
       },
