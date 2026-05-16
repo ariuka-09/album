@@ -9,13 +9,8 @@ const yoga = createYoga({
   schema,
   graphqlEndpoint: "/api/graphql",
   fetchAPI: { Response, Request, Headers },
-  // Surface the real error message in production so we can debug
-  maskedErrors: {
-    maskError(error, message) {
-      console.error("[graphql] masked error:", error);
-      return new Error(message);
-    },
-  },
+  // Expose real errors so we can debug (will harden after root cause is found)
+  maskedErrors: false,
   context: async () => {
     const session = await auth();
     console.log("[graphql] session user id:", session?.user?.id ?? "none");

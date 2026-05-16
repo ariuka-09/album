@@ -19,34 +19,53 @@ export function CreateAlbumModal({ onClose, onCreated }: Props) {
     setLoading(true);
     setError(null);
 
-    const res = await fetch("/api/graphql", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        query: `
-          mutation CreateAlbum($title: String!, $description: String) {
-            createAlbum(title: $title, description: $description) {
-              id title
+    try {
+      const res = await fetch("/api/graphql", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: `
+            mutation CreateAlbum($title: String!, $description: String) {
+              createAlbum(title: $title, description: $description) {
+                id title
+              }
             }
-          }
-        `,
-        variables: { title: title.trim(), description: description.trim() || null },
-      }),
-    });
+          `,
+          variables: { title: title.trim(), description: description.trim() || null },
+        }),
+      });
 
-    const json = await res.json() as {
-      errors?: { message: string }[];
-      data: { createAlbum: { id: string; title: string } };
-    };
-    setLoading(false);
+      // Log raw response for debugging
+      const text = await res.text();
+      console.log("[createAlbum] status:", res.status, "body:", text);
 
-    if (json.errors) {
-      setError(json.errors[0]?.message ?? "Failed to create album");
-      return;
+      if (!res.ok) {
+        setError(`HTTP ${res.status}: ${text.slice(0, 120)}`);
+        return;
+      }
+
+      const json = JSON.parse(text) as {
+        errors?: { message: string }[];
+        data?: { createAlbum: { id: string; title: string } | null };
+      };
+
+      if (json.errors?.length) {
+        setError(json.errors.map(e => e.message).join("; "));
+        return;
+      }
+
+      if (!json.data?.createAlbum) {
+        setError("Server returned no album data");
+        return;
+      }
+
+      onCreated(json.data.createAlbum);
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Network error");
+    } finally {
+      setLoading(false);
     }
-
-    onCreated(json.data.createAlbum);
-    onClose();
   }
 
   return (

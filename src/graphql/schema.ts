@@ -146,17 +146,27 @@ builder.mutationType({
   fields: (t) => ({
     createAlbum: t.field({
       type: AlbumType,
+      nullable: true,
       args: {
         title: t.arg.string({ required: true }),
         description: t.arg.string(),
       },
       resolve: async (_root, args, ctx) => {
+        console.log("[createAlbum] ctx.user:", ctx.user?.id ?? "null");
         if (!ctx.user) throw new GraphQLError("Unauthenticated", { extensions: { code: "UNAUTHENTICATED" } });
-        const [album] = await ctx.db
-          .insert(albums)
-          .values({ title: args.title, description: args.description ?? null, createdBy: ctx.user.id })
-          .returning();
-        return album;
+        try {
+          const rows = await ctx.db
+            .insert(albums)
+            .values({ title: args.title, description: args.description ?? null, createdBy: ctx.user.id })
+            .returning();
+          console.log("[createAlbum] returning rows:", JSON.stringify(rows));
+          const album = rows[0];
+          if (!album) throw new GraphQLError("Insert returned no rows", { extensions: { code: "INSERT_FAILED" } });
+          return album;
+        } catch (err) {
+          console.error("[createAlbum] insert error:", err);
+          throw new GraphQLError(err instanceof Error ? err.message : "Insert failed", { extensions: { code: "DB_ERROR" } });
+        }
       },
     }),
 
