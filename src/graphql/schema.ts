@@ -97,6 +97,12 @@ AlbumType.implement({
 
 builder.queryType({
   fields: (t) => ({
+    me: t.field({
+      type: UserType,
+      nullable: true,
+      resolve: (_root, _args, ctx) => ctx.user ?? null,
+    }),
+
     albums: t.field({
       type: [AlbumType],
       resolve: async (_root, _args, ctx) =>

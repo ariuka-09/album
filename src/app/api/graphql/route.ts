@@ -1,6 +1,6 @@
 import { createYoga } from "graphql-yoga";
 import { schema } from "@/graphql/schema";
-import { auth } from "@/auth";
+import { getToken } from "next-auth/jwt";
 import { getDb } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -14,20 +14,18 @@ const yoga = createYoga({
   logging: true,
 });
 
-// Build context here in the route handler where auth() / cookies() work,
-// then pass it as serverContext so yoga doesn't need to call auth() itself.
-async function buildContext(): Promise<Context> {
-  const session = await auth();
-  console.log("[graphql] session user id:", session?.user?.id ?? "none");
+async function buildContext(request: Request): Promise<Context> {
+  const token = await getToken({ req: request, secret: process.env.AUTH_SECRET });
+  console.log("[graphql] token sub:", token?.sub ?? "none");
 
   const db = await getDb();
 
   let currentUser = null;
-  if (session?.user?.id) {
+  if (token?.sub) {
     const [user] = await db
       .select()
       .from(users)
-      .where(eq(users.id, session.user.id));
+      .where(eq(users.id, token.sub));
     console.log("[graphql] db user:", user?.id ?? "not found");
     currentUser = user ?? null;
   }
@@ -36,11 +34,11 @@ async function buildContext(): Promise<Context> {
 }
 
 export async function GET(request: Request) {
-  const ctx = await buildContext();
+  const ctx = await buildContext(request);
   return yoga.fetch(request, ctx);
 }
 
 export async function POST(request: Request) {
-  const ctx = await buildContext();
+  const ctx = await buildContext(request);
   return yoga.fetch(request, ctx);
 }
