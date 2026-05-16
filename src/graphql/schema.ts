@@ -1,5 +1,5 @@
 import { eq, desc } from "drizzle-orm";
-import { GraphQLError } from "graphql";
+import { createGraphQLError } from "graphql-yoga";
 import { builder } from "./builder";
 import { albums, posts, postPhotos, users } from "@/db/schema";
 
@@ -153,20 +153,21 @@ builder.mutationType({
       },
       resolve: async (_root, args, ctx) => {
         console.log("[createAlbum] ctx.user:", ctx.user?.id ?? "null");
-        if (!ctx.user) throw new GraphQLError("Unauthenticated", { extensions: { code: "UNAUTHENTICATED" } });
+        if (!ctx.user) throw createGraphQLError("Unauthenticated", { extensions: { code: "UNAUTHENTICATED" } });
+        let rows: (typeof albums.$inferSelect)[];
         try {
-          const rows = await ctx.db
+          rows = await ctx.db
             .insert(albums)
             .values({ title: args.title, description: args.description ?? null, createdBy: ctx.user.id })
             .returning();
           console.log("[createAlbum] returning rows:", JSON.stringify(rows));
-          const album = rows[0];
-          if (!album) throw new GraphQLError("Insert returned no rows", { extensions: { code: "INSERT_FAILED" } });
-          return album;
         } catch (err) {
           console.error("[createAlbum] insert error:", err);
-          throw new GraphQLError(err instanceof Error ? err.message : "Insert failed", { extensions: { code: "DB_ERROR" } });
+          throw createGraphQLError(err instanceof Error ? err.message : "Insert failed", { extensions: { code: "DB_ERROR" } });
         }
+        const album = rows[0];
+        if (!album) throw createGraphQLError("Insert returned no rows", { extensions: { code: "INSERT_FAILED" } });
+        return album;
       },
     }),
 
@@ -174,8 +175,8 @@ builder.mutationType({
       type: "Boolean",
       args: { id: t.arg.string({ required: true }) },
       resolve: async (_root, args, ctx) => {
-        if (!ctx.user) throw new GraphQLError("Unauthenticated", { extensions: { code: "UNAUTHENTICATED" } });
-        if (ctx.user.role !== "admin") throw new GraphQLError("Forbidden", { extensions: { code: "FORBIDDEN" } });
+        if (!ctx.user) throw createGraphQLError("Unauthenticated", { extensions: { code: "UNAUTHENTICATED" } });
+        if (ctx.user.role !== "admin") throw createGraphQLError("Forbidden", { extensions: { code: "FORBIDDEN" } });
         await ctx.db.delete(albums).where(eq(albums.id, args.id));
         return true;
       },
@@ -188,7 +189,7 @@ builder.mutationType({
         coverUrl: t.arg.string({ required: true }),
       },
       resolve: async (_root, args, ctx) => {
-        if (!ctx.user) throw new GraphQLError("Unauthenticated", { extensions: { code: "UNAUTHENTICATED" } });
+        if (!ctx.user) throw createGraphQLError("Unauthenticated", { extensions: { code: "UNAUTHENTICATED" } });
         const [album] = await ctx.db
           .update(albums)
           .set({ coverUrl: args.coverUrl })
@@ -206,7 +207,7 @@ builder.mutationType({
         photoUrls: t.arg.stringList({ required: true }),
       },
       resolve: async (_root, args, ctx) => {
-        if (!ctx.user) throw new GraphQLError("Unauthenticated", { extensions: { code: "UNAUTHENTICATED" } });
+        if (!ctx.user) throw createGraphQLError("Unauthenticated", { extensions: { code: "UNAUTHENTICATED" } });
         const [post] = await ctx.db
           .insert(posts)
           .values({ albumId: args.albumId, description: args.description ?? null, createdBy: ctx.user.id })
@@ -226,10 +227,10 @@ builder.mutationType({
       type: "Boolean",
       args: { id: t.arg.string({ required: true }) },
       resolve: async (_root, args, ctx) => {
-        if (!ctx.user) throw new GraphQLError("Unauthenticated", { extensions: { code: "UNAUTHENTICATED" } });
+        if (!ctx.user) throw createGraphQLError("Unauthenticated", { extensions: { code: "UNAUTHENTICATED" } });
         const [post] = await ctx.db.select().from(posts).where(eq(posts.id, args.id));
-        if (!post) throw new GraphQLError("Not found", { extensions: { code: "NOT_FOUND" } });
-        if (post.createdBy !== ctx.user.id && ctx.user.role !== "admin") throw new GraphQLError("Forbidden", { extensions: { code: "FORBIDDEN" } });
+        if (!post) throw createGraphQLError("Not found", { extensions: { code: "NOT_FOUND" } });
+        if (post.createdBy !== ctx.user.id && ctx.user.role !== "admin") throw createGraphQLError("Forbidden", { extensions: { code: "FORBIDDEN" } });
         await ctx.db.delete(posts).where(eq(posts.id, args.id));
         return true;
       },
