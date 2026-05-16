@@ -87,19 +87,17 @@ export default async function AlbumPage({
         userName={session?.user?.name ?? ""}
         userAvatar={session?.user?.image}
       />
-      <main className="max-w-5xl mx-auto px-4 py-8">
-        <AlbumDetail
-          album={{
-            id: album.id,
-            title: album.title,
-            description: album.description,
-            coverUrl: album.coverUrl,
-            creatorName: album.creatorName ?? "Unknown",
-          }}
-          posts={postsData}
-          currentUserId={session?.user?.id ?? ""}
-        />
-      </main>
+      <AlbumDetail
+        album={{
+          id: album.id,
+          title: album.title,
+          description: album.description,
+          coverUrl: album.coverUrl,
+          creatorName: album.creatorName ?? "Unknown",
+        }}
+        posts={postsData}
+        currentUserId={session?.user?.id ?? ""}
+      />
     </div>
   );
 }

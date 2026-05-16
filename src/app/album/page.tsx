@@ -41,9 +41,7 @@ export default async function AlbumsPage() {
         userName={session?.user?.name ?? ""}
         userAvatar={session?.user?.image}
       />
-      <main className="max-w-5xl mx-auto px-4 py-8">
-        <AlbumGrid albums={albumData} />
-      </main>
+      <AlbumGrid albums={albumData} />
     </div>
   );
 }

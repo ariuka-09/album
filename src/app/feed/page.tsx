@@ -55,10 +55,7 @@ export default async function FeedPage() {
         userName={session?.user?.name ?? ""}
         userAvatar={session?.user?.image}
       />
-      <main className="max-w-2xl mx-auto px-4 py-8">
-        <h1 className="text-xl font-bold text-white mb-6">Feed</h1>
-        <FeedList posts={feedData} currentUserId={session?.user?.id ?? ""} />
-      </main>
+      <FeedList posts={feedData} currentUserId={session?.user?.id ?? ""} />
     </div>
   );
 }

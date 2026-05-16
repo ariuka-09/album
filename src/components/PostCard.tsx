@@ -13,6 +13,7 @@ type Props = {
   createdAt: string;
   onDelete?: () => void;
   canDelete?: boolean;
+  onSetCover?: (url: string) => void;
 };
 
 export function PostCard({
@@ -26,68 +27,114 @@ export function PostCard({
   createdAt,
   onDelete,
   canDelete,
+  onSetCover,
 }: Props) {
   const sorted = [...photos].sort((a, b) => a.orderIndex - b.orderIndex);
   const cover = sorted[0];
 
+  const dateStr = new Date(createdAt).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
   return (
-    <div className="bg-zinc-800 rounded-xl overflow-hidden">
-      {cover && (
-        <Link href={`/post/${id}`}>
-          <div className="aspect-video bg-zinc-700 overflow-hidden relative">
-            <img
-              src={cover.url}
-              alt=""
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+    <div className="post-card">
+      <Link href={`/post/${id}`} style={{ display: "block" }}>
+        <div className="cover">
+          {cover ? (
+            <div
+              className="cover-gradient"
+              style={{
+                backgroundImage: `url(${cover.url})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
             />
-            {photos.length > 1 && (
-              <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
-                +{photos.length - 1}
-              </div>
-            )}
-          </div>
-        </Link>
-      )}
-      <div className="p-4">
-        {description && (
-          <p className="text-zinc-200 text-sm mb-3 line-clamp-3">
-            {description}
-          </p>
-        )}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {creatorAvatar ? (
-              <img
-                src={creatorAvatar}
-                alt={creatorName}
-                className="w-6 h-6 rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-6 h-6 rounded-full bg-zinc-600 flex items-center justify-center text-xs text-white font-bold">
-                {creatorName[0]?.toUpperCase()}
-              </div>
-            )}
-            <span className="text-zinc-400 text-xs">{creatorName}</span>
-          </div>
-          <div className="flex items-center gap-3 text-xs text-zinc-500">
-            {albumTitle && albumId && (
-              <Link
-                href={`/album/${albumId}`}
-                className="hover:text-zinc-300 transition-colors"
+          ) : (
+            <div
+              className="cover-gradient"
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--sepia-500) 0%, var(--ink-surface) 100%)",
+              }}
+            />
+          )}
+          <div className="grain-overlay" />
+          {photos.length > 1 && (
+            <div className="photo-count">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="9" cy="9" r="1.5" fill="currentColor"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+              {" "}{photos.length}
+            </div>
+          )}
+          <div className="hover-actions">
+            {onSetCover && cover && (
+              <button
+                className="action-btn"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onSetCover(cover.url);
+                }}
               >
-                {albumTitle}
-              </Link>
+                Set cover
+              </button>
             )}
-            <span>{new Date(createdAt).toLocaleDateString()}</span>
             {canDelete && onDelete && (
               <button
-                onClick={onDelete}
-                className="text-red-400 hover:text-red-300 transition-colors"
+                className="action-btn danger"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onDelete();
+                }}
               >
                 Delete
               </button>
             )}
           </div>
+        </div>
+      </Link>
+      <div className="card-meta">
+        {description && <p className="post-caption">{description}</p>}
+        <div className="post-byline">
+          {creatorAvatar ? (
+            <img className="avatar-img" src={creatorAvatar} alt={creatorName} />
+          ) : (
+            <div
+              className="avatar-img"
+              style={{
+                background: "var(--sepia-500)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 9,
+                fontWeight: 600,
+                color: "var(--cream-50)",
+                flexShrink: 0,
+              }}
+            >
+              {creatorName[0]?.toUpperCase()}
+            </div>
+          )}
+          <span className="byline-name">{creatorName}</span>
+          {albumTitle && albumId && (
+            <>
+              <span className="dot" />
+              <Link
+                href={`/album/${albumId}`}
+                style={{ color: "var(--text-3)", fontSize: 12, textDecoration: "none" }}
+              >
+                {albumTitle}
+              </Link>
+            </>
+          )}
+          <span className="dot" />
+          <span>{dateStr}</span>
         </div>
       </div>
     </div>

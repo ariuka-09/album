@@ -1,12 +1,29 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
-const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+});
+
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+});
 
 export const metadata: Metadata = {
   title: "Class Album",
-  description: "A community photo album for classmates",
+  description: "A shared photo album for classmates",
 };
 
 export default function RootLayout({
@@ -19,8 +36,10 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
-      <body className={`${geist.variable} antialiased bg-zinc-950 text-white min-h-screen`}>
-        {children}
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable}`}
+      >
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

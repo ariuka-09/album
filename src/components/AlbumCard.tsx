@@ -18,36 +18,60 @@ export function AlbumCard({
   postCount,
 }: Props) {
   return (
-    <Link
-      href={`/album/${id}`}
-      className="group block bg-zinc-800 rounded-xl overflow-hidden hover:ring-2 hover:ring-white/20 transition-all"
-    >
-      <div className="aspect-video bg-zinc-700 relative overflow-hidden">
-        {coverUrl ? (
-          <img
-            src={coverUrl}
-            alt={title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-zinc-500 text-4xl">
-            🖼
+    <Link href={`/album/${id}`} className="album-card" style={{ textDecoration: "none" }}>
+      <div className="cover">
+        <div
+          className="cover-gradient"
+          style={
+            coverUrl
+              ? {
+                  backgroundImage: `url(${coverUrl})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }
+              : {
+                  background:
+                    "linear-gradient(135deg, var(--sepia-500) 0%, var(--ink-surface) 100%)",
+                }
+          }
+        />
+        <div className="grain-overlay" />
+        <div className="cover-meta">
+          <div
+            style={{
+              marginLeft: "auto",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 12,
+              fontFamily: "var(--font-mono)",
+              color: "var(--cream-50)",
+            }}
+          >
+            {postCount != null && (
+              <>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <circle cx="9" cy="9" r="1.5" fill="currentColor"/>
+                  <path d="M21 15l-5-5L5 21"/>
+                </svg>
+                {postCount}
+              </>
+            )}
           </div>
-        )}
+        </div>
       </div>
-      <div className="p-4">
-        <h3 className="font-semibold text-white truncate">{title}</h3>
-        {description && (
-          <p className="text-zinc-400 text-sm mt-1 line-clamp-2">
-            {description}
-          </p>
-        )}
-        <div className="flex items-center justify-between mt-3 text-xs text-zinc-500">
-          <span>by {creatorName}</span>
-          {postCount != null && (
-            <span>
-              {postCount} {postCount === 1 ? "post" : "posts"}
-            </span>
+      <div className="card-meta">
+        <h3 className="card-title">{title}</h3>
+        <div className="card-sub">
+          <span className="by">{creatorName}</span>
+          {description && (
+            <>
+              <span className="dot" />
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {description}
+              </span>
+            </>
           )}
         </div>
       </div>

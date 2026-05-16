@@ -34,7 +34,10 @@ export function CreateAlbumModal({ onClose, onCreated }: Props) {
       }),
     });
 
-    const json = await res.json() as { errors?: { message: string }[]; data: { createAlbum: { id: string; title: string } } };
+    const json = await res.json() as {
+      errors?: { message: string }[];
+      data: { createAlbum: { id: string; title: string } };
+    };
     setLoading(false);
 
     if (json.errors) {
@@ -47,14 +50,14 @@ export function CreateAlbumModal({ onClose, onCreated }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="bg-zinc-900 rounded-2xl w-full max-w-md p-6 shadow-2xl">
-        <h2 className="text-white font-semibold text-lg mb-4">New Album</h2>
-        <form onSubmit={submit} className="flex flex-col gap-4">
-          <div>
-            <label className="text-zinc-400 text-sm mb-1.5 block">Title</label>
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <h2 className="modal-title">New Album</h2>
+        <form onSubmit={submit}>
+          <div style={{ marginBottom: 16 }}>
+            <label className="modal-label">Title</label>
             <input
-              className="w-full bg-zinc-800 text-white rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-white/20"
+              className="modal-input"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Class of 2025"
@@ -62,32 +65,33 @@ export function CreateAlbumModal({ onClose, onCreated }: Props) {
               autoFocus
             />
           </div>
-          <div>
-            <label className="text-zinc-400 text-sm mb-1.5 block">
-              Description
-              <span className="text-zinc-600 ml-1">(optional)</span>
+          <div style={{ marginBottom: 16 }}>
+            <label className="modal-label">
+              Description{" "}
+              <span style={{ color: "var(--text-3)" }}>(optional)</span>
             </label>
             <textarea
-              className="w-full bg-zinc-800 text-white rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-white/20 resize-none"
+              className="modal-input"
+              style={{ resize: "none" }}
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Our graduation memories..."
+              placeholder="Our graduation memories…"
             />
           </div>
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-          <div className="flex gap-3 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg py-2 text-sm transition-colors"
-            >
+          {error && (
+            <p style={{ color: "var(--sepia-300)", fontSize: 13, marginBottom: 12 }}>
+              {error}
+            </p>
+          )}
+          <div className="modal-actions">
+            <button type="button" className="btn btn-ghost" onClick={onClose}>
               Cancel
             </button>
             <button
               type="submit"
+              className="btn btn-primary"
               disabled={loading || !title.trim()}
-              className="flex-1 bg-white hover:bg-zinc-100 text-black rounded-lg py-2 text-sm font-medium transition-colors disabled:opacity-50"
             >
               {loading ? "Creating…" : "Create"}
             </button>

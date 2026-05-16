@@ -77,30 +77,47 @@ export function CreatePostModal({ albumId, onClose, onCreated }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="bg-zinc-900 rounded-2xl w-full max-w-md p-6 shadow-2xl">
-        <h2 className="text-white font-semibold text-lg mb-4">New Post</h2>
-        <form onSubmit={submit} className="flex flex-col gap-4">
-          {/* Photo picker */}
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <h2 className="modal-title">New Post</h2>
+        <form onSubmit={submit}>
+          {/* Photo picker drop zone */}
           <div
+            className="drop-zone"
             onClick={() => inputRef.current?.click()}
-            className="border-2 border-dashed border-zinc-700 rounded-xl p-4 cursor-pointer hover:border-zinc-500 transition-colors min-h-[120px] flex items-center justify-center"
+            style={{ marginBottom: 16 }}
           >
             {previews.length > 0 ? (
-              <div className="flex gap-2 flex-wrap">
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {previews.map((src, i) => (
                   <img
                     key={i}
                     src={src}
                     alt=""
-                    className="h-20 w-20 object-cover rounded-lg"
+                    style={{ height: 80, width: 80, objectFit: "cover", borderRadius: "var(--radius)" }}
                   />
                 ))}
               </div>
             ) : (
-              <p className="text-zinc-500 text-sm text-center">
-                Click to select photos
-              </p>
+              <div style={{ textAlign: "center" }}>
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ color: "var(--text-3)", marginBottom: 8 }}
+                >
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+                <p style={{ color: "var(--text-3)", fontSize: 13 }}>
+                  Click to select photos
+                </p>
+              </div>
             )}
           </div>
           <input
@@ -108,17 +125,18 @@ export function CreatePostModal({ albumId, onClose, onCreated }: Props) {
             type="file"
             accept="image/*"
             multiple
-            className="hidden"
+            style={{ display: "none" }}
             onChange={onFileChange}
           />
 
-          <div>
-            <label className="text-zinc-400 text-sm mb-1.5 block">
-              Caption
-              <span className="text-zinc-600 ml-1">(optional)</span>
+          <div style={{ marginBottom: 16 }}>
+            <label className="modal-label">
+              Caption{" "}
+              <span style={{ color: "var(--text-3)" }}>(optional)</span>
             </label>
             <textarea
-              className="w-full bg-zinc-800 text-white rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-white/20 resize-none"
+              className="modal-input"
+              style={{ resize: "none" }}
               rows={2}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -126,20 +144,20 @@ export function CreatePostModal({ albumId, onClose, onCreated }: Props) {
             />
           </div>
 
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          {error && (
+            <p style={{ color: "var(--sepia-300)", fontSize: 13, marginBottom: 12 }}>
+              {error}
+            </p>
+          )}
 
-          <div className="flex gap-3 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg py-2 text-sm transition-colors"
-            >
+          <div className="modal-actions">
+            <button type="button" className="btn btn-ghost" onClick={onClose}>
               Cancel
             </button>
             <button
               type="submit"
+              className="btn btn-primary"
               disabled={loading || files.length === 0}
-              className="flex-1 bg-white hover:bg-zinc-100 text-black rounded-lg py-2 text-sm font-medium transition-colors disabled:opacity-50"
             >
               {loading ? "Posting…" : "Post"}
             </button>

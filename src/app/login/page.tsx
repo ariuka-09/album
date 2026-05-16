@@ -2,11 +2,11 @@ import { signIn } from "@/auth";
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
-      <div className="text-center max-w-sm w-full">
-        <div className="text-5xl mb-4">📸</div>
-        <h1 className="text-2xl font-bold text-white mb-2">Class Album</h1>
-        <p className="text-zinc-400 text-sm mb-8">
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-mark">C</div>
+        <h1 className="login-title">Class <em>Album</em></h1>
+        <p className="login-sub">
           A shared space for your classmates&apos; memories
         </p>
 
@@ -16,14 +16,15 @@ export default function LoginPage() {
             await signIn("google", { redirectTo: "/album" });
           }}
         >
-          <button
-            type="submit"
-            className="w-full flex items-center justify-center gap-3 bg-white hover:bg-zinc-100 text-black font-medium rounded-xl py-3 px-4 transition-colors"
-          >
+          <button type="submit" className="btn btn-primary" style={{ width: "100%", justifyContent: "center", padding: "12px 20px", fontSize: 15 }}>
             <GoogleIcon />
             Sign in with Google
           </button>
         </form>
+
+        <p style={{ marginTop: 20, color: "var(--text-3)", fontSize: 12, textAlign: "center" }}>
+          Invite-only · Class of &apos;24
+        </p>
       </div>
     </div>
   );
