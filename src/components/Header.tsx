@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 type Props = {
   userName: string;
@@ -49,14 +50,12 @@ export function Header({ userName, userAvatar }: Props) {
           <span className="text-white/70 text-sm hidden sm:block">
             {userName}
           </span>
-          <form action="/api/auth/signout" method="POST">
-            <button
-              type="submit"
-              className="text-white/50 hover:text-white text-sm ml-2 transition-colors"
-            >
-              Sign out
-            </button>
-          </form>
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="text-white/50 hover:text-white text-sm ml-2 transition-colors"
+          >
+            Sign out
+          </button>
         </div>
       </div>
     </header>
