@@ -515,6 +515,18 @@ body::before {
 .stage-nav.prev { left: 18px; }
 .stage-nav.next { right: 18px; }
 
+.stage-download {
+  position: absolute; top: 18px; right: 18px;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(12,10,9,.55); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  color: var(--cream-50); text-decoration: none;
+  font-size: 12px; font-family: var(--font-mono);
+  padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.08);
+  cursor: pointer; transition: background .2s ease;
+}
+.stage-download:hover { background: rgba(12,10,9,.85); }
+.stage-download svg { display: block; }
+
 .thumb-strip { display: flex; gap: 10px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
 .thumb {
   position: relative; width: 84px; height: 56px; border-radius: 8px; overflow: hidden;

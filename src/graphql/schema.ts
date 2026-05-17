@@ -1,7 +1,8 @@
 import { eq, desc } from "drizzle-orm";
+import { GraphQLError } from "graphql";
 import { createGraphQLError } from "graphql-yoga";
 import { builder } from "./builder";
-import { albums, posts, postPhotos, users } from "@/db/schema";
+import { albums, posts, postPhotos, users, invites } from "@/db/schema";
 
 // D1 may return createdAt as a raw UNIX-seconds integer instead of a Date
 // depending on the drizzle version. Normalise defensively.
@@ -238,6 +239,30 @@ builder.mutationType({
         if (!post) throw createGraphQLError("Not found", { extensions: { code: "NOT_FOUND" } });
         if (post.createdBy !== ctx.user.id && ctx.user.role !== "admin") throw createGraphQLError("Forbidden", { extensions: { code: "FORBIDDEN" } });
         await ctx.db.delete(posts).where(eq(posts.id, args.id));
+        return true;
+      },
+    }),
+
+    addInvite: t.field({
+      type: "Boolean",
+      args: { email: t.arg.string({ required: true }) },
+      resolve: async (_root, args, ctx) => {
+        if (!ctx.user) throw new GraphQLError("Unauthenticated", { extensions: { code: "UNAUTHENTICATED" } });
+        if (ctx.user.role !== "admin") throw new GraphQLError("Forbidden", { extensions: { code: "FORBIDDEN" } });
+        const email = args.email.toLowerCase().trim();
+        await ctx.db.insert(invites).values({ email }).onConflictDoNothing();
+        return true;
+      },
+    }),
+
+    removeInvite: t.field({
+      type: "Boolean",
+      args: { email: t.arg.string({ required: true }) },
+      resolve: async (_root, args, ctx) => {
+        if (!ctx.user) throw new GraphQLError("Unauthenticated", { extensions: { code: "UNAUTHENTICATED" } });
+        if (ctx.user.role !== "admin") throw new GraphQLError("Forbidden", { extensions: { code: "FORBIDDEN" } });
+        const email = args.email.toLowerCase().trim();
+        await ctx.db.delete(invites).where(eq(invites.email, email));
         return true;
       },
     }),

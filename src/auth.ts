@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { drizzle } from "drizzle-orm/d1";
-import { sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { invites, users } from "@/db/schema";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -15,37 +15,42 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (!user.email) return false;
 
       const email = user.email.toLowerCase();
-      // providerAccountId is the stable Google sub — same as token.sub
+      // providerAccountId is the stable Google sub — use it as the user id
       const userId = account?.providerAccountId ?? user.id!;
+      console.log("[auth] signIn attempt:", email, "userId:", userId);
 
       try {
         const { env } = await getCloudflareContext({ async: true });
         const db = drizzle(env.DB);
 
+        // Use simple eq — emails are stored and compared as lowercase
         const [invite] = await db
           .select()
           .from(invites)
-          .where(sql`lower(${invites.email}) = ${email}`);
+          .where(eq(invites.email, email));
+
+        console.log("[auth] invite found:", !!invite);
 
         if (!invite) {
           console.log(`[auth] sign-in rejected: ${email} not on invite list`);
           return false;
         }
 
-        // Upsert on id; if a stale row exists with the same email but
-        // different id (e.g. old UUID), update that row's id to the
-        // correct Google sub instead.
+        // Upsert: if a stale row exists with same email but different id
+        // (e.g. old UUID), update it to the correct Google sub.
         const existing = await db
           .select({ id: users.id })
           .from(users)
-          .where(sql`lower(${users.email}) = ${email}`)
+          .where(eq(users.email, email))
           .get();
+
+        console.log("[auth] existing user:", existing?.id ?? "none");
 
         if (existing && existing.id !== userId) {
           await db
             .update(users)
             .set({ id: userId, name: user.name ?? "Unknown", avatar: user.image ?? null })
-            .where(sql`lower(${users.email}) = ${email}`);
+            .where(eq(users.email, email));
         } else {
           await db
             .insert(users)
@@ -69,7 +74,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return false;
       }
     },
-    jwt({ token }) {
+    jwt({ token, account }) {
+      // Pin token.sub to the Google sub so it matches what we store in the
+      // users table. Without this, next-auth may use an internal UUID instead.
+      if (account?.providerAccountId) {
+        token.sub = account.providerAccountId;
+      }
       return token;
     },
     session({ session, token }) {
