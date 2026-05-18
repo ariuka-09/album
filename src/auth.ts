@@ -70,6 +70,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         return true;
       } catch (err) {
+        // CF Worker context not available (e.g. running with `next dev`).
+        // Fall back to the DEV_ALLOWED_EMAILS env var so local development
+        // doesn't require a full wrangler build.
+        if (process.env.DEV_ALLOWED_EMAILS) {
+          const allowed = process.env.DEV_ALLOWED_EMAILS
+            .split(",").map((e) => e.trim().toLowerCase());
+          if (allowed.includes(email)) {
+            console.log("[auth] dev bypass: allowing", email);
+            return true;
+          }
+        }
         console.error("[auth] signIn callback error:", err);
         return false;
       }

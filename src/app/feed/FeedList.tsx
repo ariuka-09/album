@@ -74,9 +74,14 @@ export function FeedList({
 
   if (posts.length === 0) {
     return (
-      <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-3)" }}>
-        <p style={{ fontSize: 40, marginBottom: 12 }}>📷</p>
-        <p>Nothing posted yet. Go add some memories!</p>
+      <div className="empty-state">
+        <div className="empty-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/>
+          </svg>
+        </div>
+        <p className="empty-title">Nothing posted yet</p>
+        <p className="empty-hint">Go add some memories to get the feed started.</p>
       </div>
     );
   }
@@ -91,7 +96,7 @@ export function FeedList({
         </p>
       </div>
 
-      <div className="feed">
+      <div className="feed" data-hover="lift">
         {posts.map((p) => {
           const sorted = [...p.photos].sort((a, b) => a.orderIndex - b.orderIndex);
           const cover = sorted[0];
@@ -174,16 +179,16 @@ export function FeedList({
               )}
 
               <div className="feed-actions">
-                <button>
+                <button className="feed-action-btn">
                   <HeartIcon /> 12
                 </button>
-                <button>
+                <button className="feed-action-btn">
                   <CommentIcon /> 3
                 </button>
                 {p.createdBy === currentUserId && (
                   <button
+                    className="feed-action-btn danger"
                     onClick={() => deletePost(p.id)}
-                    style={{ color: "var(--text-3)" }}
                   >
                     Delete
                   </button>

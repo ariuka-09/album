@@ -7,6 +7,7 @@ type Props = {
   coverUrl?: string | null;
   creatorName: string;
   postCount?: number;
+  variant?: string;
 };
 
 export function AlbumCard({
@@ -16,9 +17,10 @@ export function AlbumCard({
   coverUrl,
   creatorName,
   postCount,
+  variant,
 }: Props) {
   return (
-    <Link href={`/album/${id}`} className="album-card" style={{ textDecoration: "none" }}>
+    <Link href={`/album/${id}`} className={`album-card${variant ? ` ${variant}` : ""}`} style={{ textDecoration: "none" }}>
       <div className="cover">
         <div
           className="cover-gradient"

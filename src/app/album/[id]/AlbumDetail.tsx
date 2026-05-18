@@ -130,12 +130,19 @@ export function AlbumDetail({ album, posts, currentUserId }: Props) {
 
         {/* Posts grid */}
         {posts.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-3)" }}>
-            <p style={{ fontSize: 40, marginBottom: 12 }}>📷</p>
-            <p>No posts yet. Be the first to add one!</p>
+          <div className="empty-state">
+            <div className="empty-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="9" cy="9" r="1.5" fill="currentColor" stroke="none"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+            </div>
+            <p className="empty-title">No posts yet</p>
+            <p className="empty-hint">Be the first to add a memory to this album.</p>
           </div>
         ) : (
-          <div className="posts-grid">
+          <div className="posts-grid" data-hover="lift">
             {posts.map((p) => (
               <PostCard
                 key={p.id}
