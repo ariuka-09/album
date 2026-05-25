@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 function ArrowLeftIcon() {
   return (
@@ -28,6 +29,22 @@ function DownloadIcon() {
   );
 }
 
+function BookmarkIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 6L9 17l-5-5"/>
+    </svg>
+  );
+}
+
 /**
  * Convert a photo URL into a download URL that forces the browser to save
  * the file rather than navigate to it. For URLs served by our /api/photos
@@ -47,12 +64,38 @@ function toDownloadHref(url: string, index: number): { href: string; filename: s
   }
 }
 
-export function PhotoGallery({ photos }: { photos: string[] }) {
+export function PhotoGallery({
+  photos,
+  albumId,
+}: {
+  photos: string[];
+  albumId?: string;
+}) {
   const [active, setActive] = useState(0);
+  const [coverState, setCoverState] = useState<"idle" | "loading" | "done">("idle");
+  const router = useRouter();
 
   if (photos.length === 0) return null;
 
   const { href: downloadHref, filename: downloadName } = toDownloadHref(photos[active], active);
+
+  async function setAsCover() {
+    if (!albumId || coverState === "loading") return;
+    setCoverState("loading");
+    await fetch("/api/graphql", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: `mutation UpdateAlbumCover($id: String!, $coverUrl: String!) {
+          updateAlbumCover(id: $id, coverUrl: $coverUrl) { id }
+        }`,
+        variables: { id: albumId, coverUrl: photos[active] },
+      }),
+    });
+    setCoverState("done");
+    router.refresh();
+    setTimeout(() => setCoverState("idle"), 2000);
+  }
 
   return (
     <div className="post-stage">
@@ -73,28 +116,41 @@ export function PhotoGallery({ photos }: { photos: string[] }) {
           <div className="photo-num">
             {String(active + 1).padStart(2, "0")} / {String(photos.length).padStart(2, "0")}
           </div>
-          <a
-            className="stage-download"
-            href={downloadHref}
-            download={downloadName}
-            aria-label="Download photo"
-            title="Download photo"
-          >
-            <DownloadIcon />
-            <span>Download</span>
-          </a>
+          <div className="stage-top-right">
+            {albumId && (
+              <button
+                className={`stage-action${coverState === "done" ? " done" : ""}`}
+                onClick={setAsCover}
+                disabled={coverState === "loading"}
+                title="Set as album cover"
+              >
+                {coverState === "done" ? <CheckIcon /> : <BookmarkIcon />}
+                <span>{coverState === "done" ? "Cover set" : "Set as cover"}</span>
+              </button>
+            )}
+            <a
+              className="stage-action"
+              href={downloadHref}
+              download={downloadName}
+              aria-label="Download photo"
+              title="Download photo"
+            >
+              <DownloadIcon />
+              <span>Download</span>
+            </a>
+          </div>
           {photos.length > 1 && (
             <>
               <button
                 className="stage-nav prev"
-                onClick={() => setActive((i) => (i - 1 + photos.length) % photos.length)}
+                onClick={() => { setActive((i) => (i - 1 + photos.length) % photos.length); setCoverState("idle"); }}
                 aria-label="Previous photo"
               >
                 <ArrowLeftIcon />
               </button>
               <button
                 className="stage-nav next"
-                onClick={() => setActive((i) => (i + 1) % photos.length)}
+                onClick={() => { setActive((i) => (i + 1) % photos.length); setCoverState("idle"); }}
                 aria-label="Next photo"
               >
                 <ArrowRightIcon />

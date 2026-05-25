@@ -556,17 +556,23 @@ body::before {
 .stage-nav.prev { left: 18px; }
 .stage-nav.next { right: 18px; }
 
-.stage-download {
+.stage-top-right {
   position: absolute; top: 18px; right: 18px;
+  display: flex; align-items: center; gap: 8px; z-index: 2;
+}
+.stage-action {
   display: inline-flex; align-items: center; gap: 6px;
   background: rgba(12,10,9,.55); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   color: var(--cream-50); text-decoration: none;
   font-size: 12px; font-family: var(--font-mono);
   padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.08);
-  cursor: pointer; transition: background .2s ease;
+  cursor: pointer; transition: background .2s ease, border-color .2s ease;
+  font-family: inherit; background: rgba(12,10,9,.55);
 }
-.stage-download:hover { background: rgba(12,10,9,.85); }
-.stage-download svg { display: block; }
+.stage-action:hover { background: rgba(12,10,9,.85); }
+.stage-action:disabled { opacity: .5; cursor: default; }
+.stage-action.done { border-color: rgba(201,168,119,.4); color: var(--sepia-300); }
+.stage-action svg { display: block; flex-shrink: 0; }
 
 .thumb-strip { display: flex; gap: 10px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
 .thumb {

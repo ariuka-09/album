@@ -67,7 +67,7 @@ export default async function PostPage({
 
       <main className="post-detail page-anim">
         {/* Cinematic photo stage */}
-        <PhotoGallery photos={photos.map((p) => p.url)} />
+        <PhotoGallery photos={photos.map((p) => p.url)} albumId={post.albumId} />
 
         {/* Post metadata section */}
         <section className="post-meta-section">
