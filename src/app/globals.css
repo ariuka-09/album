@@ -60,6 +60,47 @@
 [data-theme="light"] .login-page::before { border-color: rgba(100,70,30,.08); }
 [data-theme="light"] .login-page::after  { border-color: rgba(100,70,30,.13); }
 
+/* ── Light mode fixes ────────────────────────────────────────── */
+
+/* Primary button: cream-50 becomes dark in light mode → flip to dark bg + light text */
+[data-theme="light"] .btn-primary {
+  background: #2a221a;
+  color: #f6efe2;
+  box-shadow: 0 1px 0 rgba(255,255,255,.06) inset, 0 4px 14px -8px rgba(40,30,15,.2);
+}
+[data-theme="light"] .btn-primary:hover { background: #3d2f21; }
+
+/* Italic accents use --cream-200 (#d8c8a3) which is near-invisible on cream bg */
+[data-theme="light"] .page-title em,
+[data-theme="light"] .brand-name em { color: var(--sepia-500); }
+
+/* Active nav underline: --cream-200 near-invisible → use sepia */
+[data-theme="light"] .nav-link.active::after { background: var(--sepia-400); }
+
+/* Active mobile sheet item */
+[data-theme="light"] .sheet-item.active { color: var(--sepia-500); }
+
+/* Post body drop cap */
+[data-theme="light"] .post-body-caption::first-letter { color: var(--sepia-500); }
+
+/* Active thumbnail border */
+[data-theme="light"] .thumb.active { border-color: var(--sepia-400); }
+
+/* Photo overlay elements: these sit on dark translucent backdrops over images,
+   so they always need light text — --cream-50 being dark in light mode breaks them */
+[data-theme="light"] .album-card .cover-badge,
+[data-theme="light"] .album-card .cover-meta,
+[data-theme="light"] .post-stage .photo-num,
+[data-theme="light"] .stage-nav,
+[data-theme="light"] .feed-nav { color: #f6efe2; }
+
+/* stage-action has a .done variant with sepia colour we want to preserve */
+[data-theme="light"] .stage-action { color: #f6efe2; }
+[data-theme="light"] .stage-action.done { color: var(--sepia-300); }
+
+/* Active carousel dot (pill on dark photo backdrop) */
+[data-theme="light"] .feed-dot.active { background: #f6efe2; }
+
 * { box-sizing: border-box; }
 
 html, body {
