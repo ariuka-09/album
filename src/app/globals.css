@@ -526,7 +526,10 @@ body::before {
 .feed-cover:hover .feed-nav { opacity: 1; }
 
 /* always visible on touch devices */
-@media (hover: none) { .feed-nav { opacity: 1; } }
+@media (hover: none) {
+  .feed-nav { opacity: 1; }
+  .post-card .hover-actions { opacity: 1; transform: translateY(0); }
+}
 
 .feed-dots {
   position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
@@ -807,6 +810,8 @@ body::before {
   .album-grid.layout-magazine .album-card { grid-column: span 2 !important; }
   .album-grid.layout-magazine .album-card .cover { aspect-ratio: 4/3 !important; }
   .posts-grid { grid-template-columns: 1fr 1fr; gap: 18px 12px; }
+  .post-card .hover-actions { flex-wrap: wrap; gap: 6px; }
+  .post-card .hover-actions .action-btn { flex: 1; text-align: center; }
   .post-stage { padding: 16px 12px 24px; }
   .stage-nav { width: 36px; height: 36px; }
   .stage-nav.prev { left: 8px; } .stage-nav.next { right: 8px; }
